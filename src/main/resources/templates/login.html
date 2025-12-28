@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title th:text="#{login.title}">Login</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+
+<body>
+    <div class="lang-switch">
+        <select onchange="window.location.href='?lang=' + this.value">
+            <option value="en" th:selected="${#locale.language == 'en'}">English</option>
+            <option value="hi" th:selected="${#locale.language == 'hi'}">Hindi</option>
+        </select>
+    </div>
+
+    <div class="auth-container">
+        <span class="logo">FarmerGPT</span>
+        <h2 th:text="#{login.title}">Login</h2>
+
+        <div th:if="${error}" class="alert-error" th:text="#{auth.error.login}">
+            Invalid email or password.
+        </div>
+        <div th:if="${message}" class="alert-success" th:text="#{auth.success.password}">
+            Password changed successfully.
+        </div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="username" th:text="#{email.label}">Email</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password" th:text="#{password.label}">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div style="text-align: right; margin-bottom: 15px;">
+                <a href="/forgot-password" style="font-size: 0.9rem; color: #2e7d32;"
+                    th:text="#{auth.forgot.link}">Forgot Password?</a>
+            </div>
+            <button type="submit" class="btn-primary" th:text="#{login.button}">Login</button>
+        </form>
+
+        <div class="switch-auth">
+            <p><span th:text="#{auth.no_account}">Don't have an account?</span> <a th:href="@{/signup}"
+                    th:text="#{signup.title}">Sign Up</a></p>
+        </div>
+    </div>
+</body>
+
+</html>

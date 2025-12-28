@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title th:text="#{signup.title}">Sign Up</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+
+<body>
+    <div class="lang-switch">
+        <select onchange="window.location.href='?lang=' + this.value">
+            <option value="en" th:selected="${#locale.language == 'en'}">English</option>
+            <option value="hi" th:selected="${#locale.language == 'hi'}">Hindi</option>
+        </select>
+    </div>
+
+    <div class="auth-container">
+        <span class="logo">FarmerGPT</span>
+        <h2 th:text="#{signup.title}">Sign Up</h2>
+
+        <div th:if="${error}" class="alert-error" th:text="#{auth.error.signup}">
+            Email already exists.
+        </div>
+
+        <form th:action="@{/signup}" th:object="${user}" method="post">
+            <div class="form-group">
+                <label for="name" th:text="#{name.label}">Name</label>
+                <input type="text" id="name" th:field="*{name}" required>
+            </div>
+            <div class="form-group">
+                <label for="email" th:text="#{email.label}">Email</label>
+                <input type="email" id="email" th:field="*{email}" required>
+            </div>
+            <div class="form-group">
+                <label for="password" th:text="#{password.label}">Password</label>
+                <input type="password" id="password" th:field="*{password}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="securityQuestion" th:text="#{auth.security.question}">Security Question</label>
+                <select id="securityQuestion" th:field="*{securityQuestion}" required>
+                    <option value="" disabled selected>Select a question</option>
+                    <option value="pet" th:text="#{auth.question.pet}">What is your pet's name?</option>
+                    <option value="school" th:text="#{auth.question.school}">What was your first school?</option>
+                    <option value="city" th:text="#{auth.question.city}">In which city were you born?</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="securityAnswer" th:text="#{auth.security.answer}">Security Answer</label>
+                <input type="text" id="securityAnswer" th:field="*{securityAnswer}" required>
+            </div>
+            <button type="submit" class="btn-primary" th:text="#{signup.title}">Sign Up</button>
+        </form>
+
+        <div class="switch-auth">
+            <p><span th:text="#{auth.has_account}">Already have an account?</span> <a th:href="@{/login}"
+                    th:text="#{login.button}">Login</a></p>
+        </div>
+    </div>
+</body>
+
+</html>

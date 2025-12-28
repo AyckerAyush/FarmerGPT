@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title th:text="#{profile.title}">Profile</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+
+<body>
+    <div class="auth-container">
+        <span class="logo">FarmerGPT</span>
+        <h2 th:text="#{profile.title}">Profile</h2>
+
+        <div th:if="${message}" class="alert-success" th:text="${message}">
+            Profile updated successfully.
+        </div>
+
+        <form th:action="@{/profile}" method="post">
+            <div class="form-group">
+                <label for="name" th:text="#{name.label}">Name</label>
+                <input type="text" id="name" name="name" th:value="${user.name}" required>
+            </div>
+            <div class="form-group">
+                <label for="securityQuestion" th:text="#{auth.security.question}">Security Question</label>
+                <select id="securityQuestion" name="securityQuestion" required>
+                    <option value="pet" th:selected="${user.securityQuestion == 'pet'}" th:text="#{auth.question.pet}">
+                        What is your pet's name?</option>
+                    <option value="school" th:selected="${user.securityQuestion == 'school'}"
+                        th:text="#{auth.question.school}">What was your first school?</option>
+                    <option value="city" th:selected="${user.securityQuestion == 'city'}"
+                        th:text="#{auth.question.city}">In which city were you born?</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="securityAnswer" th:text="#{auth.security.answer}">Security Answer</label>
+                <input type="text" id="securityAnswer" name="securityAnswer" th:value="${user.securityAnswer}" required>
+            </div>
+            <div class="form-group">
+                <label for="password" th:text="#{password.label}">New Password (leave blank to keep current)</label>
+                <input type="password" id="password" name="password">
+            </div>
+            <button type="submit" class="btn-primary" th:text="#{profile.update.button}">Update Profile</button>
+        </form>
+        <div class="switch-auth">
+            <p><a href="/chat">Back to Chat</a></p>
+        </div>
+    </div>
+</body>
+
+</html>

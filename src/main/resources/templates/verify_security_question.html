@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Verify Security Question</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+
+<body>
+    <div class="auth-container">
+        <span class="logo">FarmerGPT</span>
+        <h2>Security Check</h2>
+
+        <div th:if="${error}" class="alert-error" th:text="${error}">
+            Incorrect Answer.
+        </div>
+
+        <form th:action="@{/verify-security-question}" method="post">
+            <input type="hidden" name="email" th:value="${email}">
+            <div class="form-group">
+                <label>Security Question:</label>
+                <p style="font-weight: bold; margin-top: 5px;" th:switch="${question}">
+                    <span th:case="'pet'" th:text="#{auth.question.pet}">What is your pet's name?</span>
+                    <span th:case="'school'" th:text="#{auth.question.school}">What was your first school?</span>
+                    <span th:case="'city'" th:text="#{auth.question.city}">In which city were you born?</span>
+                    <span th:case="*" th:text="${question}">Question</span>
+                </p>
+            </div>
+            <div class="form-group">
+                <label for="answer" th:text="#{auth.security.answer}">Answer</label>
+                <input type="text" id="answer" name="answer" required>
+            </div>
+            <button type="submit" class="btn-primary" th:text="#{auth.verify.button}">Verify</button>
+        </form>
+        <div class="switch-auth">
+            <p><a th:href="@{/login}" th:text="#{login.button}">Login</a></p>
+        </div>
+    </div>
+</body>
+
+</html>

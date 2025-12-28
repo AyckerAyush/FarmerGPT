@@ -1,0 +1,34 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# VS Code
+.vscode/
+
+# Eclipse
+.classpath
+.project
+.settings/
+.springBeans
+
+# Application Specific
+uploads/
+data/
+logs/
+secrets.properties
+
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Secrets (Optional - recommended if you use real keys)
+# application.properties

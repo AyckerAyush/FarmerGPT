@@ -1,0 +1,67 @@
+/* CSS for Markdown Content */
+.message-content {
+    font-size: 0.95rem;
+}
+
+.message-content p {
+    margin: 5px 0;
+}
+
+.message-content h1,
+.message-content h2,
+.message-content h3 {
+    margin: 10px 0 5px 0;
+    font-weight: 600;
+}
+
+.message-content ul,
+.message-content ol {
+    margin: 5px 0;
+    padding-left: 20px;
+}
+
+.message-content li {
+    margin-bottom: 3px;
+}
+
+.message-content strong {
+    font-weight: bold;
+    color: #2e7d32;
+    /* Dark Green highlight */
+}
+
+.message-content em {
+    font-style: italic;
+}
+
+.message-content code {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+}
+
+.message-content pre {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+    border: 1px solid #eee;
+}
+
+.message-content pre code {
+    background-color: transparent;
+    padding: 0;
+}
+
+.message-content blockquote {
+    border-left: 3px solid #ccc;
+    margin: 5px 0;
+    padding-left: 10px;
+    color: #666;
+}
+
+.message-content a {
+    color: #1b5e20;
+    text-decoration: underline;
+}

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title th:text="#{chat.title}">Farmer Chat</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/markdown.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+            --sidebar-bg: rgba(20, 50, 20, 0.95);
+            --chat-bg: #f8f9fa;
+            --user-msg-bg: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+            --ai-msg-bg: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666;
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--chat-bg);
+            display: flex;
+            align-items: stretch;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Glassmorphism Sidebar */
+        .sidebar {
+            width: 320px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            padding-left: 0;
+            padding-right: 0;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            color: var(--text-primary);
+            margin-right: 15px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .new-chat-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 25px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .new-chat-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .chat-list-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .chat-list-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-list-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            border: var(--glass-border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-list-item-title {
+            font-weight: 500;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-list-item-date {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            margin-top: 4px;
+        }
+
+        /* Main Chat Area */
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            position: relative;
+            background-image: radial-gradient(#e8f5e9 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .chat-header {
+            padding: 20px 30px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            margin: 0;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        /* Messages */
+        .messages-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            line-height: 1.6;
+            position: relative;
+            animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            font-size: 0.95rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: var(--user-msg-bg);
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(67, 160, 71, 0.2);
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            background: var(--ai-msg-bg);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+            border: 1px solid #eee;
+        }
+
+        .message img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 12px;
+            display: block;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Floating Input Area */
+        .input-area {
+            padding: 20px 30px 30px;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            position: relative;
+            z-index: 5;
+        }
+
+        .input-wrapper {
+            background: white;
+            width: 90%;
+            max-width: 900px;
+            padding: 8px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .input-area input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            font-size: 1rem;
+            outline: none;
+            font-family: inherit;
+            background: transparent;
+        }
+
+        .action-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .send-btn {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(67, 160, 71, 0.3);
+        }
+
+        .file-btn {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .file-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        /* Image Preview */
+        #image-preview-container {
+            display: none;
+            position: absolute;
+            bottom: 100px;
+            left: 50px;
+            background: white;
+            padding: 8px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .remove-img {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef5350;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2 th:text="#{chat.title}">Farmer Chat</h2>
+        <button class="new-chat-btn" onclick="createNewChat()" th:text="#{new.chat}">+ New Chat</button>
+        <div id="chat-list"></div>
+        <div style="margin-top:auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <a href="/profile"
+                style="color: white; text-decoration: none; display: block; margin-bottom: 10px; font-weight: bold;"
+                th:text="#{profile.menu}">Profile</a>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" style="background:none; border:none; color:white; cursor:pointer;"
+                    th:text="#{logout.button}">Logout</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-chat">
+        <div class="chat-header">
+            <div class="chat-header-left">
+                <button class="toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <h3 id="chat-title" th:text="#{select.chat}">Select a chat...</h3>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="share-btn" onclick="shareChat()" th:text="#{share.button}"
+                    style="background:none; border:1px solid #ccc; padding:5px 10px; border-radius:5px; cursor:pointer;">Share</button>
+                <div class="lang-switch" style="position: static;">
+                    <select onchange="window.location.href='?lang=' + this.value" style="padding:5px;">
+                        <option value="en" th:selected="${#locale.language == 'en'}">English</option>
+                        <option value="hi" th:selected="${#locale.language == 'hi'}">हिंदी</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="messages-area" id="messages-area"></div>
+
+        <div id="image-preview-container">
+            <span class="remove-img" onclick="clearImage()">X</span>
+            <img id="image-preview" src="" alt="Preview">
+        </div>
+
+        <div class="input-area">
+            <div class="input-wrapper">
+                <button class="action-btn file-btn" onclick="document.getElementById('file-input').click()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48">
+                        </path>
+                    </svg>
+                </button>
+                <input type="file" id="file-input" style="display: none;" accept="image/*"
+                    onchange="previewImage(this)">
+
+                <input type="text" id="message-input" th:placeholder="#{ask.placeholder}"
+                    onkeypress="handleKeyPress(event)">
+
+                <button class="action-btn send-btn" onclick="sendMessage()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal for New Chat -->
+    <div id="newChatModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3 th:text="#{modal.title}">Start a New Conversation</h3>
+            <input type="text" id="newChatTopic" th:placeholder="#{modal.placeholder}"
+                onkeypress="handleModalKeyPress(event)">
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeNewChatModal()" th:text="#{modal.cancel}">Cancel</button>
+                <button class="modal-btn create" onclick="submitNewChat()" th:text="#{modal.create}">Create
+                    Chat</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 400px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transform: scale(0.9);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: #1b5e20;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .modal-btn.cancel {
+            background: #eee;
+            color: #555;
+        }
+
+        .modal-btn.cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .modal-btn.create {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .modal-btn.create:hover {
+            background: #43A047;
+        }
+    </style>
+
+    <script>
+        window.appConfig = {
+            locale: "[[${#locale.language}]]",
+            translations: {
+                clipboardCopied: "[[#{js.clipboard.copied}]]",
+                connectionError: "[[#{js.error.connection}]]"
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+    </script>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+
+</html>
