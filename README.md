@@ -32,7 +32,7 @@
 
 1.  **Clone the Repository**
     ```bash
-    git clone https://github.com/yourusername/FarmerGPT.git
+    git clone https://github.com/AyckerAyush/FarmerGPT.git
     cd FarmerGPT
     ```
 
